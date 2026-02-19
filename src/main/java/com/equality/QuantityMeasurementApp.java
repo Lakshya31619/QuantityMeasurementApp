@@ -1,64 +1,62 @@
 package com.equality;
+import java.util.Objects;
 public class QuantityMeasurementApp {
-    public static class Feet {
+    public enum LengthUnit {
+        FEET(1.0),
+        INCH(1.0 / 12.0);
+        private final double toFeetFactor;
+        LengthUnit(double toFeetFactor) {
+            this.toFeetFactor = toFeetFactor;
+        }
+        public double toFeet(double value) {
+            return value * toFeetFactor;
+        }
+    }
+    public static class QuantityLength {
         private final double value;
-        public Feet(double value) {
+        private final LengthUnit unit;
+        public QuantityLength(double value, LengthUnit unit) {
+            if (unit == null) {
+                throw new IllegalArgumentException("Unit cannot be null");
+            }
             this.value = value;
+            this.unit = unit;
         }
         public double getValue() {
             return value;
+        }
+        public LengthUnit getUnit() {
+            return unit;
+        }
+        private double toBaseUnit() {
+            return unit.toFeet(value);
         }
         @Override
         public boolean equals(Object obj) {
             if (this == obj) return true;
             if (obj == null || getClass() != obj.getClass()) return false;
-            Feet other = (Feet) obj;
-            return Double.compare(this.value, other.value) == 0;
+            QuantityLength other = (QuantityLength) obj;
+            return Double.compare(this.toBaseUnit(), other.toBaseUnit()) == 0;
         }
         @Override
         public int hashCode() {
-            return Double.hashCode(value);
-        }
-    }
-    public static class Inches {
-        private final double value;
-        public Inches(double value) {
-            this.value = value;
-        }
-        public double getValue() {
-            return value;
+            return Objects.hash(toBaseUnit());
         }
         @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            Inches other = (Inches) obj;
-            return Double.compare(this.value, other.value) == 0;
-        }
-        @Override
-        public int hashCode() {
-            return Double.hashCode(value);
+        public String toString() {
+            return "Quantity(" + value + ", " + unit + ")";
         }
     }
-    public static boolean compareFeet(double value1, double value2) {
-        Feet feet1 = new Feet(value1);
-        Feet feet2 = new Feet(value2);
-        return feet1.equals(feet2);
-    }
-    public static boolean compareInches(double value1, double value2) {
-        Inches inch1 = new Inches(value1);
-        Inches inch2 = new Inches(value2);
-        return inch1.equals(inch2);
+    public static boolean compare(double value1, LengthUnit unit1, double value2, LengthUnit unit2) {
+        QuantityLength q1 = new QuantityLength(value1, unit1);
+        QuantityLength q2 = new QuantityLength(value2, unit2);
+        return q1.equals(q2);
     }
     public static void main(String[] args) {
-        double feetValue1 = 1.0;
-        double feetValue2 = 1.0;
-        double inchValue1 = 1.0;
-        double inchValue2 = 1.0;
-        System.out.println("Input: " + feetValue1 + " ft and " + feetValue2 + " ft");
-        System.out.println("Output: Equal (" + compareFeet(feetValue1, feetValue2) + ")");
+        System.out.println("Input: Quantity(1.0, FEET) and Quantity(12.0, INCH)");
+        System.out.println("Output: Equal (" + compare(1.0, LengthUnit.FEET, 12.0, LengthUnit.INCH) + ")");
         System.out.println();
-        System.out.println("Input: " + inchValue1 + " inch and " + inchValue2 + " inch");
-        System.out.println("Output: Equal (" + compareInches(inchValue1, inchValue2) + ")");
+        System.out.println("Input: Quantity(1.0, INCH) and Quantity(1.0, INCH)");
+        System.out.println("Output: Equal (" + compare(1.0, LengthUnit.INCH, 1.0, LengthUnit.INCH) + ")");
     }
 }
