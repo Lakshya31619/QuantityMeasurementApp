@@ -1,62 +1,40 @@
 package com.equality;
-import java.util.Objects;
-public class QuantityMeasurementApp {
-    public enum LengthUnit {
-        FEET(1.0),
-        INCH(1.0 / 12.0);
-        private final double toFeetFactor;
-        LengthUnit(double toFeetFactor) {
-            this.toFeetFactor = toFeetFactor;
-        }
-        public double toFeet(double value) {
-            return value * toFeetFactor;
-        }
+
+public class QuantityMeasurementApp 
+{
+    // Static method for Feet equality check
+    public static boolean checkFeetEquality(double value1, double value2) {
+        QuantityLength feet1 = new QuantityLength(value1, LengthUnit.FEET);
+        QuantityLength feet2 = new QuantityLength(value2, LengthUnit.FEET);
+        return feet1.equals(feet2);
     }
-    public static class QuantityLength {
-        private final double value;
-        private final LengthUnit unit;
-        public QuantityLength(double value, LengthUnit unit) {
-            if (unit == null) {
-                throw new IllegalArgumentException("Unit cannot be null");
-            }
-            this.value = value;
-            this.unit = unit;
-        }
-        public double getValue() {
-            return value;
-        }
-        public LengthUnit getUnit() {
-            return unit;
-        }
-        private double toBaseUnit() {
-            return unit.toFeet(value);
-        }
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            QuantityLength other = (QuantityLength) obj;
-            return Double.compare(this.toBaseUnit(), other.toBaseUnit()) == 0;
-        }
-        @Override
-        public int hashCode() {
-            return Objects.hash(toBaseUnit());
-        }
-        @Override
-        public String toString() {
-            return "Quantity(" + value + ", " + unit + ")";
-        }
+
+    // Static method for Inches equality check
+    public static boolean checkInchesEquality(double value1, double value2) {
+        QuantityLength inches1 = new QuantityLength(value1, LengthUnit.INCH);
+        QuantityLength inches2 = new QuantityLength(value2, LengthUnit.INCH);
+        return inches1.equals(inches2);
     }
-    public static boolean compare(double value1, LengthUnit unit1, double value2, LengthUnit unit2) {
-        QuantityLength q1 = new QuantityLength(value1, unit1);
-        QuantityLength q2 = new QuantityLength(value2, unit2);
-        return q1.equals(q2);
-    }
+
     public static void main(String[] args) {
-        System.out.println("Input: Quantity(1.0, FEET) and Quantity(12.0, INCH)");
-        System.out.println("Output: Equal (" + compare(1.0, LengthUnit.FEET, 12.0, LengthUnit.INCH) + ")");
-        System.out.println();
-        System.out.println("Input: Quantity(1.0, INCH) and Quantity(1.0, INCH)");
-        System.out.println("Output: Equal (" + compare(1.0, LengthUnit.INCH, 1.0, LengthUnit.INCH) + ")");
+        // Using static methods for Feet equality checks
+        System.out.println("=== Feet Comparisons ===");
+        System.out.println("Comparing 1.0 ft and 1.0 ft: " + checkFeetEquality(1.0, 1.0));
+        System.out.println("Comparing 1.0 ft and 2.0 ft: " + checkFeetEquality(1.0, 2.0));
+        
+        // Direct object comparison for additional cases
+        QuantityLength feet1 = new QuantityLength(1.0, LengthUnit.FEET);
+        System.out.println("Comparing 1.0 ft with null: " + feet1.equals(null));
+        System.out.println("Comparing 1.0 ft with itself: " + feet1.equals(feet1));
+        
+        // Using static methods for Inches equality checks
+        System.out.println("\n=== Inches Comparisons ===");
+        System.out.println("Comparing 1.0 inch and 1.0 inch: " + checkInchesEquality(1.0, 1.0));
+        System.out.println("Comparing 1.0 inch and 2.0 inch: " + checkInchesEquality(1.0, 2.0));
+        
+        // Direct object comparison for additional cases
+        QuantityLength inches1 = new QuantityLength(1.0, LengthUnit.INCH);
+        System.out.println("Comparing 1.0 inch with null: " + inches1.equals(null));
+        System.out.println("Comparing 1.0 inch with itself: " + inches1.equals(inches1));
     }
 }
