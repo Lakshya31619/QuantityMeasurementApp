@@ -76,12 +76,6 @@ public class QuantityMeasurementApp {
     }
 
     public static void main(String[] args) {
-        System.out.println("========================================");
-        System.out.println("   QUANTITY MEASUREMENT APPLICATION");
-        System.out.println("========================================\n");
-
-
-        System.out.println("===== UC4: LENGTH EQUALITY & COMPARISON =====\n");
         
         System.out.println("=== Feet Comparisons ===");
         System.out.println("Comparing 1.0 ft and 1.0 ft: " + checkFeetEquality(1.0, 1.0));
@@ -108,34 +102,25 @@ public class QuantityMeasurementApp {
         System.out.println("Comparing 2.0 cm and 2.0 cm: " + checkCentimeterEquality(2.0, 2.0));
         demonstrateLengthComparison(1.0, LengthUnit.CENTIMETER, 0.393701, LengthUnit.INCH);
 
-        System.out.println("\n========================================");
         System.out.println("===== UC5: UNIT CONVERSION =====\n");
-
         System.out.println("--- Basic Unit Conversion ---");
         demonstrateLengthConversion(1.0, LengthUnit.FEET, LengthUnit.INCH);
         demonstrateLengthConversion(3.0, LengthUnit.YARD, LengthUnit.FEET);
         demonstrateLengthConversion(36.0, LengthUnit.INCH, LengthUnit.YARD);
-
         System.out.println("\n--- Cross-Unit Conversion ---");
         demonstrateLengthConversion(1.0, LengthUnit.CENTIMETER, LengthUnit.INCH);
         demonstrateLengthConversion(1.0, LengthUnit.FEET, LengthUnit.CENTIMETER);
-
         System.out.println("\n--- Zero Value Conversion ---");
         demonstrateLengthConversion(0.0, LengthUnit.FEET, LengthUnit.INCH);
-
         System.out.println("\n--- Negative Value Conversion ---");
         demonstrateLengthConversion(-1.0, LengthUnit.FEET, LengthUnit.INCH);
-
         System.out.println("\n--- Same-Unit Conversion ---");
         demonstrateLengthConversion(5.0, LengthUnit.FEET, LengthUnit.FEET);
-
         System.out.println("\n--- Using Instance Method (Method Overloading) ---");
         QuantityLength lengthInYards = new QuantityLength(2.0, LengthUnit.YARD);
         demonstrateLengthConversion(lengthInYards, LengthUnit.INCH);
-        
         QuantityLength lengthInCm = new QuantityLength(2.54, LengthUnit.CENTIMETER);
         demonstrateLengthConversion(lengthInCm, LengthUnit.INCH);
-
         System.out.println("\n--- Bidirectional Conversion (Round-Trip) ---");
         double original = 1.0;
         double feet2Inches = convert(original, LengthUnit.FEET, LengthUnit.INCH);
@@ -143,9 +128,5 @@ public class QuantityMeasurementApp {
         System.out.printf("Original: %.6f FEET -> %.6f INCH -> %.6f FEET (Round-trip preserved: %b)%n",
                 original, feet2Inches, inches2Feet, 
                 Math.abs(original - inches2Feet) < EPSILON);
-
-        System.out.println("\n========================================");
-        System.out.println("     Application Execution Complete");
-        System.out.println("========================================");
     }
 }
