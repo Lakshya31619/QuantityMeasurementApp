@@ -25,6 +25,22 @@ public class QuantityLength {
     public double toFeet() {
         return value * unit.toFeetFactor();
     }
+    public QuantityLength add(QuantityLength other, LengthUnit resultUnit) {
+        if (other == null) {
+            throw new IllegalArgumentException("Other length must not be null.");
+        }
+        if (resultUnit == null) {
+            throw new IllegalArgumentException("Result unit must not be null.");
+        }
+        double thisFeet = this.toFeet();
+        double otherFeet = other.toFeet();
+        double sumFeet = thisFeet + otherFeet;   
+        double resultValue = convertValue(sumFeet, LengthUnit.FEET, resultUnit);
+        return new QuantityLength(resultValue, resultUnit);
+    }
+    public QuantityLength add(QuantityLength other) {
+        return add(other, this.unit);
+    }
     private static double convertValue(double sourceValue, LengthUnit sourceUnit, LengthUnit targetUnit) {
         double valueInFeet = sourceValue * sourceUnit.toFeetFactor();
         return valueInFeet / targetUnit.toFeetFactor();
