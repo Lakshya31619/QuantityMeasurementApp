@@ -16,9 +16,9 @@ Each use case improves **design quality, scalability, and maintainability**.
 
 ---
 
+# 📂 Project Structure
 ```
-📂 Project Structure
-QuantityMeasurement/
+QuantityMeasurementApp/
 │
 ├── src/main/java/com/equality/
 │   ├── LengthUnit.java
