@@ -2,344 +2,175 @@
 
 ## 🚀 Project Overview
 
-This project demonstrates the **incremental evolution** of a Quantity Measurement system through six structured use cases:
+This project demonstrates the **incremental evolution** of a Quantity Measurement system through structured use cases:
 
-- 🟢 **UC1** – Equality comparison for *Feet*
-- 🟡 **UC2** – Equality comparison for *Feet and Inches*
-- 🔵 **UC3** – Generic, scalable `QuantityLength` with cross-unit comparison
-- 🟣 **UC4** – Extended unit support (Yard & Centimeter)
-- 🟤 **UC5** – Robust unit conversion API
-- 🟠 **UC6** – Arithmetic operations (Addition)
+- 🟢 UC1 – Equality comparison for Feet  
+- 🟡 UC2 – Equality comparison for Feet and Inches  
+- 🔵 UC3 – Generic scalable design with cross-unit equality  
+- 🟣 UC4 – Added Yard and Centimeter support  
+- 🟤 UC5 – Robust conversion API  
+- 🟠 UC6 – Addition of quantities  
+- 🔴 UC7 – Explicit target unit addition  
 
-Each use case improves **design quality, scalability, maintainability, and architectural clarity**.
+Each use case improves **design quality, scalability, and maintainability**.
 
 ---
 
-# 🟢 UC1 – Feet Measurement Equality
+# 🟢 UC1 – Feet Equality
 
 ## 🎯 Objective
-Implement equality comparison for a single measurement unit: **Feet**.
-
-## 🏗 Implementation
-- Class: `Feet`
-- Field: `double value`
-- Overrides:
-  - `equals(Object obj)`
-  - `hashCode()`
-
-### Equality Logic
-
-Double.compare(this.value, other.value) == 0
-
+Support equality comparison for **Feet** only.
 
 ## ✅ Features
-✔ Reflexive equality  
-✔ Symmetric equality  
-✔ Transitive equality  
-✔ Null safety  
-✔ Type safety  
+✔ Value-based equality  
 ✔ Floating-point safe comparison  
+✔ Null & type safety  
 
 ## ⚠ Limitation
-❌ Supports only Feet  
-❌ Adding new units would cause duplication  
+❌ Only Feet supported  
+❌ Not scalable  
 
 ---
 
-# 🟡 UC2 – Feet and Inches Equality
+# 🟡 UC2 – Feet & Inches Equality
 
 ## 🎯 Objective
-Extend UC1 to support **Inches** in addition to Feet.
-
-## 🏗 Implementation
-- Class: `Feet`
-- Class: `Inches`
-
-Both classes:
-- Store a `double value`
-- Override `equals()`
-- Override `hashCode()`
-
-🚫 Cross-unit comparison is NOT supported.
+Add support for **Inches**.
 
 ## ✅ Features
-✔ Equality within same unit  
-✔ Null safety  
-✔ Type safety  
-✔ Static comparison methods  
+✔ Same-unit equality  
 ✔ Improved test coverage  
 
 ## ⚠ Design Issue
-
-Violates **DRY (Don't Repeat Yourself) Principle**:
-
-- Duplicate constructors  
-- Duplicate `equals()` logic  
-- Duplicate `hashCode()` logic  
-
-Not scalable for future units.
+❌ Duplicate logic (violates DRY)  
+❌ No cross-unit comparison  
 
 ---
 
-# 🔵 UC3 – Generic QuantityLength (Refactored Design)
+# 🔵 UC3 – Generic QuantityLength
 
 ## 🎯 Objective
-Refactor UC2 to:
-- Remove duplication  
-- Enable cross-unit equality  
-- Improve scalability  
-
----
+Refactor to remove duplication and enable scalability.
 
 ## 🏗 Implementation
-
-### 1️⃣ Enum: `LengthUnit`
-
-Defines conversion factors to base unit (Feet):
-
-
-FEET(1.0)
-INCH(1.0 / 12.0)
-
-
----
-
-### 2️⃣ Class: `QuantityLength`
-
-Encapsulates:
-- `double value`
-- `LengthUnit unit`
-
-### 🔄 Equality Logic
-
-Both values are converted to base unit before comparison:
-
-
-Double.compare(this.toFeet(), other.toFeet()) == 0
-
-
----
+- `LengthUnit` enum (conversion factor to base unit)
+- `QuantityLength` class
 
 ## ✅ Features
-
-✔ DRY Principle applied  
-✔ Cross-unit comparison (1 ft = 12 in)  
+✔ Cross-unit equality (1 ft = 12 in)  
+✔ DRY compliant  
 ✔ Enum-based type safety  
-✔ Conversion abstraction  
 ✔ Scalable architecture  
-✔ Full equality contract compliance  
 
 ---
 
-## 🧪 Example Comparisons
-
-| Comparison | Result |
-|------------|--------|
-| 1 ft vs 1 ft | ✅ true |
-| 1 inch vs 1 inch | ✅ true |
-| 1 ft vs 12 inch | ✅ true |
-| 1 ft vs 2 ft | ❌ false |
-
----
-
-# 🟣 UC4 – Extended Unit Support (Yard & Centimeter)
+# 🟣 UC4 – Extended Unit Support
 
 ## 🎯 Objective
-Enhance system to support additional units without modifying equality logic.
+Add more units without changing business logic.
 
-New units added:
-- 🟫 Yard  
-- 🟩 Centimeter  
+## 🆕 Added Units
+- YARD  
+- CENTIMETER  
 
----
-
-## 🏗 Implementation
-
-### Updated `LengthUnit` Enum
-
-
-FEET(1.0)
-INCH(1.0 / 12.0)
-YARD(3.0)
-CENTIMETER((0.393701) / 12.0)
-
-
-Each unit defines its conversion factor to **Feet**, keeping conversion centralized.
-
----
-
-## 🔄 Cross-Unit Equality Examples
-
-| Comparison | Result |
-|------------|--------|
-| 1 yard vs 3 feet | ✅ true |
-| 1 yard vs 36 inches | ✅ true |
-| 1 cm vs 0.393701 inch | ✅ true |
-
----
-
-## ✅ Improvements
-
+## ✅ Features
+✔ 1 yd = 3 ft  
+✔ 1 in = 2.54 cm  
+✔ No change in equality logic  
 ✔ Open/Closed Principle followed  
-✔ No changes required in equality logic  
-✔ Fully backward compatible  
-✔ Easily extendable architecture  
 
 ---
 
-# 🟤 UC5 – Robust Unit Conversion API
+# 🟤 UC5 – Conversion API
 
 ## 🎯 Objective
-Introduce a complete **unit conversion feature** with:
+Provide a robust unit conversion feature.
 
-- Bidirectional conversion  
-- Method overloading  
-- Defensive programming  
-- Floating-point precision handling  
-
----
-
-## 🏗 Implementation Enhancements
-
-### New Methods in `QuantityLength`
-
-
-convertTo(LengthUnit targetUnit)
-toFeet()
-
-
-### Precision Handling
-
-
-private static final double EPSILON = 1e-6;
-
-
-Used for safe floating-point comparison.
+## ✅ Features
+✔ `convert(value, source, target)`  
+✔ Floating-point precision handling (EPSILON)  
+✔ Null & invalid input validation  
+✔ Round-trip conversion safe  
 
 ---
 
-## 🔄 Conversion Examples
-
-| Conversion | Result |
-|------------|--------|
-| 1 ft → inch | 12 |
-| 3 yard → feet | 9 |
-| 36 inch → yard | 1 |
-| 1 cm → inch | 0.393701 |
-| 1 ft → cm | 30.48 |
-
----
-
-## 🧪 Edge Case Handling
-
-✔ Zero value conversion  
-✔ Negative values  
-✔ Same-unit conversion  
-✔ Round-trip preservation  
-✔ Null validation  
-✔ Illegal argument protection  
-
----
-
-# 🟠 UC6 – Length Addition (Arithmetic Operations)
+# 🟠 UC6 – Quantity Addition
 
 ## 🎯 Objective
-Extend the system to support **addition across same and different units**.
+Support arithmetic operations.
 
----
-
-## 🏗 Implementation
-
-### New Methods in `QuantityLength`
-
-
-add(QuantityLength other, LengthUnit resultUnit)
-add(QuantityLength other)
-
-
----
-
-## 🔄 Addition Logic
-
-1. Convert both values to base unit (Feet)
-2. Add them
-3. Convert result to desired unit
-
-
-double sumFeet = thisFeet + otherFeet;
-
-
----
-
-## ➕ Addition Examples
-
-| Operation | Result |
-|------------|--------|
-| 1 ft + 2 ft | 3 ft |
-| 12 in + 1 ft | 24 in |
-| 1 yard + 3 ft | 2 yard |
-| 2.54 cm + 1 in | 5.08 cm |
-| 5 ft + (-2 ft) | 3 ft |
-
----
-
-## 🔁 Verified Mathematical Properties
-
-✔ Commutativity  
-✔ Zero identity  
+## ➕ Features
+✔ Same-unit addition  
 ✔ Cross-unit addition  
 ✔ Negative value handling  
-✔ Precision consistency  
+✔ Commutative property  
+
+Example:
+
+1 ft + 12 in = 2 ft  
 
 ---
 
-# 🔄 Complete Evolution Summary (UC1 → UC6)
+# 🔴 UC7 – Explicit Target Unit Addition
 
-| Feature | UC1 | UC2 | UC3 | UC4 | UC5 | UC6 |
-|----------|------|------|------|------|------|------|
-| Feet support | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Inches support | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| Yard support | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Centimeter support | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
-| Cross-unit equality | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Conversion API | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
-| Addition | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
-| DRY compliant | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
-| Scalable design | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+## 🎯 Objective
+Allow addition result in **any specified unit**.
+
+## ➕ Example
+
+```java
+feet.add(inches, LengthUnit.YARD);
+```
+
+## ✅ Features
+✔ Result in any unit  
+✔ No logic duplication  
+✔ Fully scalable  
+✔ Maintains precision  
+
+Example:
+
+1 ft + 12 in → 24 in  
+1 ft + 12 in → 0.67 yd  
+
+---
+
+# 🔄 Evolution Summary
+
+| Feature | UC1 | UC2 | UC3 | UC4 | UC5 | UC6 | UC7 |
+|----------|------|------|------|------|------|------|------|
+| Feet | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Inches | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Yard | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Centimeter | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ |
+| Cross-unit equality | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Conversion API | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Addition | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Target unit addition | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ |
 
 ---
 
 # 📚 Concepts Covered
 
-- 📏 Object Equality Contract  
-- 🛡 Encapsulation  
-- 🔢 Floating-point comparison  
-- ♻ DRY Principle  
-- 🔄 Refactoring  
-- 🧩 Enum usage  
-- 🏗 Clean Architecture  
-- 📈 Scalable Design  
-- 🧠 Defensive Programming  
-- ➕ Arithmetic modeling  
-- 🔁 Method Overloading  
-- 🧪 Edge case validation  
+- Object Equality Contract  
+- DRY Principle  
+- Refactoring  
+- Enum Usage  
+- Defensive Programming  
+- Floating-point Handling  
+- Clean Architecture  
+- Scalable Design  
 
 ---
 
 # 🏆 Final Outcome
 
-By UC6, the application evolves into a:
+The system evolved from a simple equality check (UC1) into a **clean, extensible, mini quantity measurement framework (UC7)** supporting:
 
-## 📏 Clean, Extensible Quantity Measurement Framework
-
-It demonstrates:
-
-- Progressive refactoring  
-- Open/Closed Principle  
-- DRY compliance  
-- Floating-point safe design  
-- Cross-unit comparison  
-- Conversion engine  
-- Arithmetic operations  
+✔ Equality  
+✔ Conversion  
+✔ Arithmetic operations  
+✔ Flexible result units  
+✔ Production-ready design  
 
 ---
