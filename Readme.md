@@ -16,6 +16,23 @@ Each use case improves **design quality, scalability, and maintainability**.
 
 ---
 
+```
+📂 Project Structure
+QuantityMeasurement/
+│
+├── src/main/java/com/equality/
+│   ├── LengthUnit.java
+│   ├── QuantityLength.java
+│   └── QuantityMeasurementApp.java
+│
+├── src/test/java/com/equality/
+│   └── QuantityMeasurementAppTest.java
+│
+└── pom.xml
+```
+
+--- 
+
 # 🟢 UC1 – Feet Equality
 
 ## 🎯 Objective
