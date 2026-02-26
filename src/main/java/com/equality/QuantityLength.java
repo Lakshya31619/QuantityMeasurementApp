@@ -13,7 +13,8 @@ public class QuantityLength {
     }
     public QuantityLength convertTo(LengthUnit targetUnit) {
         Objects.requireNonNull(targetUnit, "Target unit must not be null.");
-        double convertedValue = convertValue(this.value, this.unit, targetUnit);
+        double valueInBaseUnit = unit.convertToBaseUnit(value);
+        double convertedValue = targetUnit.convertFromBaseUnit(valueInBaseUnit);
         return new QuantityLength(convertedValue, targetUnit);
     }
     public double getValue() {
@@ -23,7 +24,7 @@ public class QuantityLength {
         return unit;
     }
     public double toFeet() {
-        return value * unit.toFeetFactor();
+        return unit.convertToBaseUnit(value);
     }
     public QuantityLength add(QuantityLength other, LengthUnit resultUnit) {
         if (other == null) {
@@ -31,19 +32,15 @@ public class QuantityLength {
         }
         if (resultUnit == null) {
             throw new IllegalArgumentException("Result unit must not be null.");
-        }
+        } 
         double thisFeet = this.toFeet();
         double otherFeet = other.toFeet();
-        double sumFeet = thisFeet + otherFeet;   
-        double resultValue = convertValue(sumFeet, LengthUnit.FEET, resultUnit);
+        double sumFeet = thisFeet + otherFeet;
+        double resultValue = resultUnit.convertFromBaseUnit(sumFeet);
         return new QuantityLength(resultValue, resultUnit);
     }
     public QuantityLength add(QuantityLength other) {
         return add(other, this.unit);
-    }
-    private static double convertValue(double sourceValue, LengthUnit sourceUnit, LengthUnit targetUnit) {
-        double valueInFeet = sourceValue * sourceUnit.toFeetFactor();
-        return valueInFeet / targetUnit.toFeetFactor();
     }
     @Override
     public boolean equals(Object obj) {
