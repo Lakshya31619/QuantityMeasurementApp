@@ -1,22 +1,22 @@
-# 📌 Quantity Measurement Application
+#  Quantity Measurement Application
 
-## 🚀 Project Overview
+##  Project Overview
 
 This project demonstrates the **incremental evolution** of a Quantity Measurement system through structured use cases:
 
-- 🟢 UC1 – Equality comparison for Feet  
-- 🟡 UC2 – Equality comparison for Feet and Inches  
-- 🔵 UC3 – Generic scalable design with cross-unit equality  
-- 🟣 UC4 – Added Yard and Centimeter support  
-- 🟤 UC5 – Robust conversion API  
-- 🟠 UC6 – Addition of quantities  
-- 🔴 UC7 – Explicit target unit addition  
+-  UC1 – Equality comparison for Feet  
+-  UC2 – Equality comparison for Feet and Inches  
+-  UC3 – Generic scalable design with cross-unit equality  
+-  UC4 – Added Yard and Centimeter support  
+-  UC5 – Robust conversion API  
+-  UC6 – Addition of quantities  
+-  UC7 – Explicit target unit addition  
 
 Each use case improves **design quality, scalability, and maintainability**.
 
 ---
 
-# 📂 Project Structure
+#  Project Structure
 ```
 QuantityMeasurementApp/
 │
@@ -33,94 +33,94 @@ QuantityMeasurementApp/
 
 --- 
 
-# 🟢 UC1 – Feet Equality
+#  UC1 – Feet Equality
 
-## 🎯 Objective
+##  Objective
 Support equality comparison for **Feet** only.
 
-## ✅ Features
-✔ Value-based equality  
-✔ Floating-point safe comparison  
-✔ Null & type safety  
+##  Features
+ Value-based equality  
+ Floating-point safe comparison  
+ Null & type safety  
 
 ## ⚠ Limitation
-❌ Only Feet supported  
-❌ Not scalable  
+ Only Feet supported  
+ Not scalable  
 
 ---
 
-# 🟡 UC2 – Feet & Inches Equality
+#  UC2 – Feet & Inches Equality
 
-## 🎯 Objective
+##  Objective
 Add support for **Inches**.
 
-## ✅ Features
-✔ Same-unit equality  
-✔ Improved test coverage  
+##  Features
+ Same-unit equality  
+ Improved test coverage  
 
-## ⚠ Design Issue
-❌ Duplicate logic (violates DRY)  
-❌ No cross-unit comparison  
+##  Design Issue
+ Duplicate logic (violates DRY)  
+ No cross-unit comparison  
 
 ---
 
-# 🔵 UC3 – Generic QuantityLength
+#  UC3 – Generic QuantityLength
 
-## 🎯 Objective
+##  Objective
 Refactor to remove duplication and enable scalability.
 
-## 🏗 Implementation
+##  Implementation
 - `LengthUnit` enum (conversion factor to base unit)
 - `QuantityLength` class
 
-## ✅ Features
-✔ Cross-unit equality (1 ft = 12 in)  
-✔ DRY compliant  
-✔ Enum-based type safety  
-✔ Scalable architecture  
+##  Features
+ Cross-unit equality (1 ft = 12 in)  
+ DRY compliant  
+ Enum-based type safety  
+ Scalable architecture  
 
 ---
 
-# 🟣 UC4 – Extended Unit Support
+#  UC4 – Extended Unit Support
 
-## 🎯 Objective
+##  Objective
 Add more units without changing business logic.
 
-## 🆕 Added Units
+##  Added Units
 - YARD  
 - CENTIMETER  
 
-## ✅ Features
-✔ 1 yd = 3 ft  
-✔ 1 in = 2.54 cm  
-✔ No change in equality logic  
-✔ Open/Closed Principle followed  
+##  Features
+ 1 yd = 3 ft  
+ 1 in = 2.54 cm  
+ No change in equality logic  
+ Open/Closed Principle followed  
 
 ---
 
-# 🟤 UC5 – Conversion API
+#  UC5 – Conversion API
 
-## 🎯 Objective
+##  Objective
 Provide a robust unit conversion feature.
 
-## ✅ Features
-✔ `convert(value, source, target)`  
-✔ Floating-point precision handling (EPSILON)  
-✔ Null & invalid input validation  
-✔ Round-trip conversion safe  
+##  Features
+ `convert(value, source, target)`  
+ Floating-point precision handling (EPSILON)  
+ Null & invalid input validation  
+ Round-trip conversion safe  
 
 ---
 
-# 🟠 UC6 – Quantity Addition
+#  UC6 – Quantity Addition
 
-## 🎯 Objective
+##  Objective
 Support arithmetic operations.
 
-## ➕ Features
-✔ Same-unit addition  
-✔ Cross-unit addition  
-✔ Negative value handling  
-✔ Commutative property  
+##  Features
+ Same-unit addition  
+ Cross-unit addition  
+ Negative value handling  
+ Commutative property  
 
 Example:
 
@@ -128,22 +128,22 @@ Example:
 
 ---
 
-# 🔴 UC7 – Explicit Target Unit Addition
+#  UC7 – Explicit Target Unit Addition
 
-## 🎯 Objective
+##  Objective
 Allow addition result in **any specified unit**.
 
-## ➕ Example
+##  Example
 
 ```java
 feet.add(inches, LengthUnit.YARD);
 ```
 
-## ✅ Features
-✔ Result in any unit  
-✔ No logic duplication  
-✔ Fully scalable  
-✔ Maintains precision  
+##  Features
+ Result in any unit  
+ No logic duplication  
+ Fully scalable  
+ Maintains precision  
 
 Example:
 
@@ -152,7 +152,7 @@ Example:
 
 ---
 
-# 🔄 Evolution Summary
+#  Evolution Summary
 
 | Feature | UC1 | UC2 | UC3 | UC4 | UC5 | UC6 | UC7 |
 |----------|------|------|------|------|------|------|------|
@@ -167,7 +167,7 @@ Example:
 
 ---
 
-# 📚 Concepts Covered
+#  Concepts Covered
 
 - Object Equality Contract  
 - DRY Principle  
@@ -180,7 +180,7 @@ Example:
 
 ---
 
-# 🏆 Final Outcome
+#  Final Outcome
 
 The system evolved from a simple equality check (UC1) into a **clean, extensible, mini quantity measurement framework (UC7)** supporting:
 
