@@ -104,6 +104,8 @@ public class QuantityMeasurementAppTest {
         assertEquals(3.78541, VolumeUnit.GALLON.convertToBaseUnit(1.0), EPSILON);
     }
 
+    // ===== UC12: SUBTRACTION TEST CASES =====
+
     @Test
     @DisplayName("Subtraction: 5.0 ft - 2.0 ft = 3.0 ft")
     public void testSubtraction_Length_SameUnit() {
@@ -158,6 +160,8 @@ public class QuantityMeasurementAppTest {
         Quantity<LengthUnit> feet = new Quantity<>(5.0, LengthUnit.FEET);
         assertThrows(IllegalArgumentException.class, () -> feet.subtract(null));
     }
+
+    // ===== UC12: DIVISION TEST CASES =====
 
     @Test
     @DisplayName("Division: 12.0 in / 1.0 ft = 1.0 in")
