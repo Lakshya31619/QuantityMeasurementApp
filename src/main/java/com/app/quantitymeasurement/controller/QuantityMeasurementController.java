@@ -1,28 +1,93 @@
 package com.app.quantitymeasurement.controller;
 
-import com.app.quantitymeasurement.entity.QuantityDTO;
+import com.app.quantitymeasurement.dto.BinaryOperationRequestDTO;
+import com.app.quantitymeasurement.dto.ConversionRequestDTO;
+import com.app.quantitymeasurement.dto.OperationRequestDTO;
+import com.app.quantitymeasurement.dto.QuantityOperationResultDTO;
+import com.app.quantitymeasurement.entity.QuantityMeasurementEntity;
 import com.app.quantitymeasurement.service.IQuantityMeasurementService;
+import jakarta.validation.Valid;
+import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+@RestController
+@RequestMapping("/api/quantity")
+@RequiredArgsConstructor
 public class QuantityMeasurementController {
+    private final IQuantityMeasurementService quantityMeasurementService;
 
-    private final IQuantityMeasurementService service;
-
-    public QuantityMeasurementController(IQuantityMeasurementService service) {
-        this.service = service;
+    @PostMapping("/convert")
+    public ResponseEntity<QuantityOperationResultDTO> convert(@Valid @RequestBody ConversionRequestDTO request) {
+        QuantityOperationResultDTO response = quantityMeasurementService.convert(
+                request.getSourceQuantity(),
+                request.getTargetUnit());
+        return ResponseEntity.ok(response);
     }
 
-    public void performComparison(QuantityDTO q1, QuantityDTO q2) {
-        boolean result = service.compare(q1, q2);
-        System.out.println("Comparison result: " + result);
+    @PostMapping("/compare")
+    public ResponseEntity<QuantityOperationResultDTO> compare(@Valid @RequestBody BinaryOperationRequestDTO request) {
+        QuantityOperationResultDTO response = quantityMeasurementService.compare(
+                request.getFirstQuantity(),
+                request.getSecondQuantity());
+        return ResponseEntity.ok(response);
     }
 
-    public void performAddition(QuantityDTO q1, QuantityDTO q2) {
-        double result = service.add(q1, q2);
-        System.out.println("Addition result: " + result);
+    @PostMapping("/add")
+    public ResponseEntity<QuantityOperationResultDTO> add(@Valid @RequestBody BinaryOperationRequestDTO request) {
+        QuantityOperationResultDTO response = quantityMeasurementService.add(
+                request.getFirstQuantity(),
+                request.getSecondQuantity(),
+                request.getResultUnit());
+        return ResponseEntity.ok(response);
     }
 
-    public void performConversion(QuantityDTO q1, String unit) {
-        double result = service.convert(q1, unit);
-        System.out.println("Converted result: " + result);
+    @PostMapping("/subtract")
+    public ResponseEntity<QuantityOperationResultDTO> subtract(@Valid @RequestBody BinaryOperationRequestDTO request) {
+        QuantityOperationResultDTO response = quantityMeasurementService.subtract(
+                request.getFirstQuantity(),
+                request.getSecondQuantity(),
+                request.getResultUnit());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/multiply")
+    public ResponseEntity<QuantityOperationResultDTO> multiply(@Valid @RequestBody BinaryOperationRequestDTO request) {
+        QuantityOperationResultDTO response = quantityMeasurementService.multiply(
+                request.getFirstQuantity(),
+                request.getSecondQuantity(),
+                request.getResultUnit());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/divide")
+    public ResponseEntity<QuantityOperationResultDTO> divide(@Valid @RequestBody BinaryOperationRequestDTO request) {
+        QuantityOperationResultDTO response = quantityMeasurementService.divide(
+                request.getFirstQuantity(),
+                request.getSecondQuantity(),
+                request.getResultUnit());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/operate")
+    public ResponseEntity<QuantityOperationResultDTO> operate(@Valid @RequestBody OperationRequestDTO request) {
+        return ResponseEntity.ok(quantityMeasurementService.operate(request));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<QuantityMeasurementEntity>> getHistory() {
+        return ResponseEntity.ok(quantityMeasurementService.getMeasurementHistory());
+    }
+
+    @GetMapping("/history/operation/{operationType}")
+    public ResponseEntity<List<QuantityMeasurementEntity>> getHistoryByOperation(
+            @PathVariable String operationType) {
+        return ResponseEntity.ok(quantityMeasurementService.getMeasurementHistoryByOperation(operationType));
     }
 }
