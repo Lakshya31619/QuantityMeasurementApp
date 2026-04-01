@@ -9,15 +9,20 @@ import com.app.quantitymeasurement.exception.QuantityMeasurementException;
 import com.app.quantitymeasurement.model.QuantityModel;
 import com.app.quantitymeasurement.repository.IQuantityMeasurementRepository;
 import com.app.quantitymeasurement.util.QuantityMathHelper;
+
 import java.util.List;
 import java.util.Locale;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 
 @Service
 @RequiredArgsConstructor
 public class QuantityMeasurementServiceImpl implements IQuantityMeasurementService {
+
     private final IQuantityMeasurementRepository repository;
 
     @Override
@@ -107,35 +112,71 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
 
         OperationType operationType = OperationType.from(request.getOperationType());
 
-        if (operationType == OperationType.CONVERT) {
-            return convert(request.getFirstQuantity(), request.getTargetUnit());
-        } else if (operationType == OperationType.COMPARE) {
-            return compare(request.getFirstQuantity(), request.getSecondQuantity());
-        } else if (operationType == OperationType.ADD) {
-            return add(request.getFirstQuantity(), request.getSecondQuantity(), request.getTargetUnit());
-        } else if (operationType == OperationType.SUBTRACT) {
-            return subtract(request.getFirstQuantity(), request.getSecondQuantity(), request.getTargetUnit());
-        } else if (operationType == OperationType.MULTIPLY) {
-            return multiply(request.getFirstQuantity(), request.getSecondQuantity(), request.getTargetUnit());
-        } else if (operationType == OperationType.DIVIDE) {
-            return divide(request.getFirstQuantity(), request.getSecondQuantity(), request.getTargetUnit());
-        } else {
-            throw new QuantityMeasurementException("Unsupported operation: " + operationType);
+        switch (operationType) {
+            case CONVERT:
+                return convert(request.getFirstQuantity(), request.getTargetUnit());
+            case COMPARE:
+                return compare(request.getFirstQuantity(), request.getSecondQuantity());
+            case ADD:
+                return add(request.getFirstQuantity(), request.getSecondQuantity(), request.getTargetUnit());
+            case SUBTRACT:
+                return subtract(request.getFirstQuantity(), request.getSecondQuantity(), request.getTargetUnit());
+            case MULTIPLY:
+                return multiply(request.getFirstQuantity(), request.getSecondQuantity(), request.getTargetUnit());
+            case DIVIDE:
+                return divide(request.getFirstQuantity(), request.getSecondQuantity(), request.getTargetUnit());
+            default:
+                throw new QuantityMeasurementException("Unsupported operation: " + operationType);
         }
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<QuantityMeasurementEntity> getMeasurementHistory() {
-        return repository.findAllByOrderByCreatedAtAsc();
+
+        String email = getCurrentUserEmailSafe();
+
+        if (email == null) {
+            return List.of();
+        }
+
+        return repository.findByUserEmailOrderByCreatedAtDesc(email);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<QuantityMeasurementEntity> getMeasurementHistoryByOperation(String operationType) {
+
+        String email = getCurrentUserEmailSafe();
+
+        if (email == null) {
+            return List.of();
+        }
+
         String normalizedOperationType = normalizeRequiredValue(operationType, "Operation type is required.")
                 .toUpperCase(Locale.ROOT);
-        return repository.findByOperationTypeOrderByCreatedAtAsc(normalizedOperationType);
+
+        return repository.findByUserEmailAndOperationTypeOrderByCreatedAtDesc(
+                email,
+                normalizedOperationType
+        );
+    }
+
+    private String getCurrentUserEmailSafe() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
+            if (auth == null || !auth.isAuthenticated()) return null;
+
+            Object principal = auth.getPrincipal();
+
+            if (principal == null || principal.equals("anonymousUser")) return null;
+
+            return principal.toString();
+
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private QuantityOperationResultDTO performArithmetic(
@@ -146,7 +187,8 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
 
         QuantityDTO sanitizedFirst = sanitizeQuantity(firstQuantity, "First quantity is required.");
         QuantityDTO sanitizedSecond = sanitizeQuantity(secondQuantity, "Second quantity is required.");
-        String resolvedResultUnit = resultUnit == null || resultUnit.trim().isEmpty()
+
+        String resolvedResultUnit = (resultUnit == null || resultUnit.trim().isEmpty())
                 ? sanitizedFirst.getUnitName()
                 : normalizeRequiredUnit(resultUnit, "Result unit is required.");
 
@@ -158,40 +200,29 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
 
             double resultValue;
 
-            if (operationType == OperationType.ADD) {
-                resultValue = QuantityMathHelper.add(
-                        firstModel.getValue(),
-                        firstModel.getUnitName(),
-                        firstModel.getMeasurementType(),
-                        secondModel.getValue(),
-                        secondModel.getUnitName(),
-                        secondModel.getMeasurementType());
-            } else if (operationType == OperationType.SUBTRACT) {
-                resultValue = QuantityMathHelper.subtract(
-                        firstModel.getValue(),
-                        firstModel.getUnitName(),
-                        firstModel.getMeasurementType(),
-                        secondModel.getValue(),
-                        secondModel.getUnitName(),
-                        secondModel.getMeasurementType());
-            } else if (operationType == OperationType.MULTIPLY) {
-                resultValue = QuantityMathHelper.multiply(
-                        firstModel.getValue(),
-                        firstModel.getUnitName(),
-                        firstModel.getMeasurementType(),
-                        secondModel.getValue(),
-                        secondModel.getUnitName(),
-                        secondModel.getMeasurementType());
-            } else if (operationType == OperationType.DIVIDE) {
-                resultValue = QuantityMathHelper.divide(
-                        firstModel.getValue(),
-                        firstModel.getUnitName(),
-                        firstModel.getMeasurementType(),
-                        secondModel.getValue(),
-                        secondModel.getUnitName(),
-                        secondModel.getMeasurementType());
-            } else {
-                throw new QuantityMeasurementException("Unsupported arithmetic operation: " + operationType);
+            switch (operationType) {
+                case ADD:
+                    resultValue = QuantityMathHelper.add(
+                            firstModel.getValue(), firstModel.getUnitName(), firstModel.getMeasurementType(),
+                            secondModel.getValue(), secondModel.getUnitName(), secondModel.getMeasurementType());
+                    break;
+                case SUBTRACT:
+                    resultValue = QuantityMathHelper.subtract(
+                            firstModel.getValue(), firstModel.getUnitName(), firstModel.getMeasurementType(),
+                            secondModel.getValue(), secondModel.getUnitName(), secondModel.getMeasurementType());
+                    break;
+                case MULTIPLY:
+                    resultValue = QuantityMathHelper.multiply(
+                            firstModel.getValue(), firstModel.getUnitName(), firstModel.getMeasurementType(),
+                            secondModel.getValue(), secondModel.getUnitName(), secondModel.getMeasurementType());
+                    break;
+                case DIVIDE:
+                    resultValue = QuantityMathHelper.divide(
+                            firstModel.getValue(), firstModel.getUnitName(), firstModel.getMeasurementType(),
+                            secondModel.getValue(), secondModel.getUnitName(), secondModel.getMeasurementType());
+                    break;
+                default:
+                    throw new QuantityMeasurementException("Unsupported arithmetic operation: " + operationType);
             }
 
             double normalizedResultValue = QuantityMathHelper.convert(
@@ -210,6 +241,7 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
                     buildSuccessfulEntity(operationType, sanitizedFirst, sanitizedSecond, resultQuantity, null));
 
             return toResultDTO(persisted);
+
         } catch (RuntimeException exception) {
             throw wrapAndRecordFailure(operationType, sanitizedFirst, sanitizedSecond, exception);
         }
@@ -225,7 +257,8 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
         }
 
         String normalizedMeasurementType = normalizeMeasurementType(quantity.getMeasurementType());
-        String normalizedUnit = normalizeRequiredUnit(quantity.getUnitName(), "Unit name is required.");
+        String normalizedUnit = normalizeRequiredUnit(quantity.getUnitName(), "Unit name is required");
+
         validateUnitForType(normalizedUnit, normalizedMeasurementType);
 
         return QuantityDTO.builder()
@@ -238,18 +271,19 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
     private void validateUnitForType(String unit, String measurementType) {
         if (!QuantityMathHelper.isValidUnitForMeasurementType(unit, measurementType)) {
             throw new QuantityMeasurementException(
-                    "Unit '" + unit + "' is not valid for measurement type '" + measurementType + "'.");
+                    "Unit '" + unit + "' is not valid for measurement type '" + measurementType + "'");
         }
     }
 
     private String normalizeMeasurementType(String measurementType) {
         String normalized = QuantityMathHelper.normalizeMeasurementType(
-                normalizeRequiredValue(measurementType, "Measurement type is required."));
+                normalizeRequiredValue(measurementType, "Measurement type is required"));
 
         if (normalized.equals("LengthUnit")) return "LENGTH";
         if (normalized.equals("WeightUnit")) return "WEIGHT";
         if (normalized.equals("VolumeUnit")) return "VOLUME";
         if (normalized.equals("TemperatureUnit")) return "TEMPERATURE";
+
         return normalized.toUpperCase(Locale.ROOT);
     }
 
@@ -280,13 +314,17 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
             Boolean comparisonResult) {
 
         QuantityMeasurementEntity entity = new QuantityMeasurementEntity();
+
         entity.setOperationType(operationType.name());
         setQuantity(entity, first, true);
         setQuantity(entity, second, false);
         setResultQuantity(entity, result);
+
         entity.setComparisonResult(comparisonResult);
         entity.setErrorMessage(null);
-        entity.setSuccessful(Boolean.TRUE);
+        entity.setSuccessful(true);
+        entity.setUserEmail(getCurrentUserEmailSafe());
+
         return entity;
     }
 
@@ -296,50 +334,42 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
             QuantityDTO second,
             RuntimeException exception) {
 
-        String message = exception.getMessage() == null
-                ? "Operation failed."
-                : exception.getMessage();
+        String message = exception.getMessage() == null ? "Operation failed." : exception.getMessage();
 
         try {
-            QuantityMeasurementEntity failedEntity = new QuantityMeasurementEntity();
-            failedEntity.setOperationType(operationType.name());
-            setQuantity(failedEntity, first, true);
-            setQuantity(failedEntity, second, false);
-            failedEntity.setErrorMessage(message);
-            failedEntity.setSuccessful(Boolean.FALSE);
-            repository.save(failedEntity);
-        } catch (RuntimeException suppressed) {
-            exception.addSuppressed(suppressed);
-        }
+            QuantityMeasurementEntity entity = new QuantityMeasurementEntity();
 
-        if (exception instanceof QuantityMeasurementException) {
-            return (QuantityMeasurementException) exception;
-        }
+            entity.setOperationType(operationType.name());
+            setQuantity(entity, first, true);
+            setQuantity(entity, second, false);
+
+            entity.setErrorMessage(message);
+            entity.setSuccessful(false);
+            entity.setUserEmail(getCurrentUserEmailSafe());
+
+            repository.save(entity);
+
+        } catch (Exception ignored) {}
 
         return new QuantityMeasurementException(message, exception);
     }
 
     private void setQuantity(QuantityMeasurementEntity entity, QuantityDTO quantity, boolean first) {
-        if (quantity == null) {
-            return;
-        }
+        if (quantity == null) return;
 
         if (first) {
             entity.setFirstOperandValue(quantity.getValue());
             entity.setFirstMeasurementType(quantity.getMeasurementType());
             entity.setFirstUnit(quantity.getUnitName());
-            return;
+        } else {
+            entity.setSecondOperandValue(quantity.getValue());
+            entity.setSecondMeasurementType(quantity.getMeasurementType());
+            entity.setSecondUnit(quantity.getUnitName());
         }
-
-        entity.setSecondOperandValue(quantity.getValue());
-        entity.setSecondMeasurementType(quantity.getMeasurementType());
-        entity.setSecondUnit(quantity.getUnitName());
     }
 
     private void setResultQuantity(QuantityMeasurementEntity entity, QuantityDTO result) {
-        if (result == null) {
-            return;
-        }
+        if (result == null) return;
 
         entity.setResultOperandValue(result.getValue());
         entity.setResultMeasurementType(result.getMeasurementType());
@@ -361,9 +391,7 @@ public class QuantityMeasurementServiceImpl implements IQuantityMeasurementServi
     }
 
     private QuantityDTO toQuantityDTO(Double value, String measurementType, String unit) {
-        if (value == null || measurementType == null || unit == null) {
-            return null;
-        }
+        if (value == null || measurementType == null || unit == null) return null;
 
         return QuantityDTO.builder()
                 .value(value)

@@ -12,13 +12,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:4200")
 public class AuthController {
 
     private final UserRepository userRepo;
     private final JwtUtil jwtUtil;
 
-    // ✅ SIGNUP
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody User user) {
 
@@ -27,37 +25,46 @@ public class AuthController {
                     .body(Map.of("message", "User already exists"));
         }
 
+        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "Password is required"));
+        }
+
         user.setProvider("LOCAL");
         userRepo.save(user);
 
         return ResponseEntity.ok(Map.of("message", "User registered"));
     }
 
-    // ✅ LOGIN
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody User user) {
 
         return userRepo.findByEmail(user.getEmail())
                 .map(existing -> {
 
-                    if (!existing.getPassword().equals(user.getPassword())) {
+                    if ("GOOGLE".equals(existing.getProvider())) {
+                        return ResponseEntity.badRequest()
+                                .body(Map.of("message", "Please login using Google"));
+                    }
+
+                    if (existing.getPassword() == null ||
+                            !existing.getPassword().equals(user.getPassword())) {
+
                         return ResponseEntity.badRequest()
                                 .body(Map.of("message", "Invalid password"));
                     }
 
                     String token = jwtUtil.generateToken(existing.getEmail());
-
                     return ResponseEntity.ok(Map.of("token", token));
                 })
                 .orElse(ResponseEntity.badRequest()
                         .body(Map.of("message", "User not found")));
     }
 
-    // ✅ GOOGLE LOGIN (basic)
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> body) {
 
-        String email = "google_user@gmail.com"; // simplified
+        String email = "google_user@gmail.com";
 
         User user = userRepo.findByEmail(email)
                 .orElseGet(() -> {
@@ -68,7 +75,6 @@ public class AuthController {
                 });
 
         String jwt = jwtUtil.generateToken(user.getEmail());
-
         return ResponseEntity.ok(Map.of("token", jwt));
     }
 }

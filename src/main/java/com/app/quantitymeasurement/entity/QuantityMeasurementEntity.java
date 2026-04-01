@@ -57,6 +57,9 @@ public class QuantityMeasurementEntity {
     @Column(name = "successful", nullable = false)
     private Boolean successful;
 
+    @Column(name = "user_email")
+    private String userEmail;
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -191,5 +194,13 @@ public class QuantityMeasurementEntity {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
     }
 }
