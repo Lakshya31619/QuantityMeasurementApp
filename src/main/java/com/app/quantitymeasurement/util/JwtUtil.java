@@ -2,6 +2,7 @@ package com.app.quantitymeasurement.util;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -10,21 +11,26 @@ import java.util.Date;
 @Component
 public class JwtUtil {
 
-    private final String SECRET = "my_super_secret_key_which_is_long_enough_12345";
+    @Value("${jwt.secret}")
+    private String secret;
+
+    @Value("${jwt.expiration-ms}")
+    private long expirationMs;
 
     private Key getSigningKey() {
-        return Keys.hmacShaKeyFor(SECRET.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     public String generateToken(String email) {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + 86400000)) // 1 day
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    // Throws JwtException (expired, malformed, bad signature) — caught by JwtAuthenticationFilter
     public String extractEmail(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
@@ -32,5 +38,14 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            extractEmail(token);
+            return true;
+        } catch (JwtException | IllegalArgumentException e) {
+            return false;
+        }
     }
 }

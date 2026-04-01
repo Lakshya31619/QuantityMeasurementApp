@@ -41,22 +41,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String email = jwtUtil.extractEmail(token);
 
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
                 UsernamePasswordAuthenticationToken authentication =
                         new UsernamePasswordAuthenticationToken(
                                 email,
                                 null,
                                 Collections.emptyList()
                         );
-
                 authentication.setDetails(
                         new WebAuthenticationDetailsSource().buildDetails(request)
                 );
-
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
 
         } catch (Exception e) {
+            // Token expired or invalid — treat request as unauthenticated
             SecurityContextHolder.clearContext();
         }
 
