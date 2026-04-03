@@ -40,23 +40,17 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .headers(headers -> headers
                 .frameOptions(frame -> frame.disable())
-                // Override COOP header — Spring's "same-origin" default blocks
-                // Google OAuth popup from sending postMessage back to the page
                 .addHeaderWriter(new StaticHeadersWriter(
                     "Cross-Origin-Opener-Policy", "unsafe-none"
                 ))
             )
             .authorizeHttpRequests(auth -> auth
-                // Auth — always public (login, signup, google)
                 .requestMatchers("/api/auth/**").permitAll()
 
-                // History — requires JWT
                 .requestMatchers("/api/quantity/history/**").authenticated()
 
-                // Operations — public so guests can calculate
                 .requestMatchers("/api/quantity/**").permitAll()
 
-                // Dev tools
                 .requestMatchers(
                     "/swagger-ui/**",
                     "/swagger-ui.html",
